@@ -95,7 +95,8 @@ Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark
         </div>
         <div class="mt-3 pe-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Prompt Templates</h3>
-            <p class="text-base font-normal text-gray-500 dark:text-gray-400">Store the actual conversation history for the LLM to know about follow-ups, etc.. </p>
+            <p class="text-base font-normal text-gray-500 dark:text-gray-400">
+            The context you pass to the LLM, memory, user query, etc...</p>
         </div>
     </div>
     <div class="relative mb-6 mb-0 w-150">
@@ -106,7 +107,7 @@ Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark
         </div>
         <div class="mt-3 pe-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Vectorstore</h3>
-            <p class="text-base font-normal text-gray-500 dark:text-gray-400">Transforms text and images from documents (or products?!) and store those embeddings in a database somewhere </p>
+            <p class="text-base font-normal text-gray-500 dark:text-gray-400">The place where you store transformed text (and/or images) from documents (or products?!) to embeddings in a database somewhere </p>
         </div>
     </div>
 </div>
