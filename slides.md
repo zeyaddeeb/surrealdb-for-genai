@@ -111,19 +111,6 @@ Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark
     </div>
 </div>
 
-<!-- <div v-click class="absolute top-62 left-160">
-  <ul>
-    <li>SQLite</li>
-    <li>MySQL</li>
-    <li>PostgreSQL</li>
-    <li class="text-sm" style="margin-left: 17px; padding-left: 7px;">
-      SQL Server <span class="chip">Preview</span>
-    </li>
-    <li class="text-sm" style="margin-left: 17px; padding-left: 7px;">
-      MongoDB <span class="chip">Early Access</span>
-    </li>
-  </ul>
-</div> -->
 
 ---
 ---
@@ -409,3 +396,80 @@ async fn link_product_variant(
     Ok(())
 }
 ```
+---
+---
+
+## LLM Contexts
+
+All LLM context facts can be easily grabbed in one query
+
+```rust
+pub async fn find_product(
+    db: &Surreal<Any>,
+    product_ids: Vec<&str>,
+) -> Result<Vec<Product>, Error> {
+    let sql: String = format!(
+        r#"
+        select *
+        , ->product_option_group->option_group.* as options
+        , ->product_variant->variant.* as variants
+        from [{}]
+        parallel;
+        "#,
+        product_ids.join(", ")
+    );
+    let mut response = db.query(sql).await?;
+    let products: Vec<Product> = response.take(0)?; // or many?!
+    Ok(products)
+}
+```
+
+
+---
+---
+
+## Embeddings
+
+SurrealDB offers native support for embeddings
+
+```sql
+DEFINE FUNCTION IF NOT EXISTS fn::embeddings_complete($embedding_model: string, $input: string) {
+    RETURN http::post(
+        "http://ollama.svc/v1/embeddings",
+        {
+            "model": $embedding_model,
+            "input": $input
+        }
+    )["data"][0]["embedding"]
+};
+```
+
+```sql
+DEFINE FUNCTION IF NOT EXISTS fn::search_for_documents($input_vector: array<float>, $threshold: float) {
+   LET $results = (
+     SELECT  url, title, text,
+        vector::similarity::cosine(content_vector, $input_vector) AS similarity
+    FROM wiki_embedding
+    WHERE content_vector <|1|> $input_vector
+    ORDER BY similarity DESC
+    LIMIT 5
+   );
+   RETURN { results: $results, count: array::len($results), threshold: $threshold};
+};
+```
+
+---
+layout: image
+image: https://joshowens.dev/static/bbbfef552d51fc10bcee51a3e1de614f/beb1d/but_does_meteor_scale_meme.jpg
+backgroundSize: contain
+---
+
+
+<div class="absolute bottom-0 left-200 text-sm">
+<a href="https://joshowens.dev/but-does-meteor-scale"> Source </a>
+</div>
+
+
+---
+---
+## What about scale?
