@@ -59,7 +59,7 @@ h1 {
 
 <div class="mx-auto w-5/6"/>
 
-Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark.circle.red="0">LLMs.</span>
+Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark.circle.red="1">LLMs.</span>
 
 </div>
 ---
@@ -123,7 +123,6 @@ use tokio::io::AsyncWriteExt;
 use tokio_stream::StreamExt;
 
 #[tokio::test]
-#[ignore]
 async fn test_generate() {
     let ollama = Ollama::default().with_model("llama3.1");
     let response = ollama.invoke("Howdy AI,...").await.unwrap();
@@ -131,7 +130,6 @@ async fn test_generate() {
 }
 
 #[tokio::test]
-#[ignore]
 async fn test_stream() {
     let ollama = Ollama::default().with_model("llama3.1");
 
@@ -257,7 +255,7 @@ backgroundSize: contain
         <p class="text-base font-normal text-gray-500 dark:text-gray-400">Can I get shoes like what Nancy Sinatra wore in these boots are made for walking?</p>
         <div v-click class="relative border-s border-gray-200 dark:border-gray-700">                  
             <div class="mb-2 ms-4">
-                <h5 class="text-gray-900 dark:text-white">Session Facts</h5>
+                <h5 class="text-gray-900 dark:text-white">Context Facts</h5>
                 <p class="font-normal text-gray-500 dark:text-gray-400">User searched for wedding 2 days ago</p>        
                 <p class="font-normal text-gray-500 dark:text-gray-400">User returned white boots last year</p>        
             </div>
@@ -439,8 +437,7 @@ DEFINE FUNCTION IF NOT EXISTS fn::embeddings_complete($embedding_model: string, 
         {
             "model": $embedding_model,
             "input": $input
-        }
-    )["data"][0]["embedding"]
+        })["data"][0]["embedding"]
 };
 ```
 
@@ -457,6 +454,9 @@ DEFINE FUNCTION IF NOT EXISTS fn::search_for_documents($input_vector: array<floa
    RETURN { results: $results, count: array::len($results), threshold: $threshold};
 };
 ```
+<div class="float-right">
+<a class="text-sm" href="https://surrealdb.com/blog/building-a-retrieval-augmented-generation-rag-app-with-openai-and-surrealdb"> Source</a>
+</div>
 
 ---
 layout: image
@@ -473,3 +473,242 @@ backgroundSize: contain
 ---
 ---
 ## What about scale?
+
+SurrealDB offers you options for distributed options:
+
+<ol>
+    <li> <span class="underline">TiKV</span> Backend: For highly-available and highly-scalable setups, SurrealDB can be run on top of a TiKV cluster.
+    </li>
+    <li> <span class="underline">FoundationDB</span> Backend: For highly-available and highly-scalable setups, SurrealDB can be run on top of a FoundationDB cluster as well.
+    </li>
+</ol>
+
+---
+---
+## TIKV
+
+Deploy a TIKV cluster on kubernetes, sample:
+
+```yaml {all}{maxHeight:'200px'}
+apiVersion: pingcap.com/v1alpha1
+kind: TidbCluster
+metadata:
+  name: {{ .Values.cluster.name }}
+  annotations:
+    tikv.tidb.pingcap.com/delete-slots: '[]'
+spec:
+  version: v8.1.1
+  timezone: UTC
+  pd:
+    baseImage: pingcap/pd
+    maxFailoverCount: 0
+    replicas: {{ .Values.cluster.numReplicas }}
+    storageClassName: {{ .Values.cluster.storageClassName }}
+    requests:
+      cpu: 500m
+      memory: 1Gi
+      storage: 2Gi
+  tikv:
+    baseImage: pingcap/tikv:v8.1.1
+    replicas:  {{ .Values.cluster.numReplicas }}
+    storageClassName: {{ .Values.cluster.storageClassName }}
+    requests:
+      cpu: {{ .Values.cluster.cpu }}
+      storage:  {{ .Values.cluster.storageSize }}
+      memory: {{ .Values.cluster.memory }}
+```
+
+Connect SurrealDB to the `tikv://` endpoint
+
+
+```yaml {all|7|all}
+image:
+  repository: surrealdb/surrealdb
+  pullPolicy: IfNotPresent
+  tag: v1.5.0
+
+surrealdb:
+  path: tikv://cluster.tikv:<port>
+  port: 8000
+```
+---
+---
+## FoundationDB
+
+Deploy a FoundationDB cluster on kubernetes, sample:
+
+```yaml {all}{maxHeight:'200px'}
+apiVersion: apps.foundationdb.org/v1beta2
+kind: FoundationDBCluster
+metadata:
+  name: name
+spec:
+  version: 7.1.42
+  labels:
+    filterOnOwnerReference: false
+    matchLabels:
+      foundationdb.org/fdb-cluster-name: name
+    processClassLabels:
+      - foundationdb.org/fdb-process-class
+    processGroupIDLabels:
+      - foundationdb.org/fdb-process-group-id
+  routing:
+    defineDNSLocalityFields: true
+  minimumUptimeSecondsForBounce: 60
+  databaseConfiguration:
+    redundancy_mode: triple
+    logs: 3
+    storage: 3
+  processCounts:
+    cluster_controller: 2
+    coordinator: 3
+    storage: 3
+    log: 3
+```
+Connect SurrealDB to the `fdb://` config file
+
+```yaml {all|7|all}
+image:
+  repository: surrealdb/surrealdb
+  pullPolicy: IfNotPresent
+  tag: v1.5.0
+
+surrealdb:
+  path: fdb:///etc/foundationdb/fdb.cluster
+  port: 8000
+```
+---
+layout: image
+image: https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhtW2ITijgWzPdUi1jFjMRuwmFnvdVPz2D8WmXg_O7HLhrVwxK7wqTOU6qhl2S60kg0LwFoNr2M0o2wo0WDE1tQSe_482j4AXQzaz1NuVfcvQqjmEvgXjgel_3DfddOW6l31kf_O7BbgxY/s1600/foun2.png
+backgroundSize: contain
+---
+---
+class: text-center
+layout: cover
+---
+# Databases are hard... <br class="my-4"/> SurrealDB makes it <br /> Easy Breezy!
+
+<style>
+h1 {
+  background-color: #ffff;
+  background-image: linear-gradient(45deg, #9A018F 10%, #8B0294 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+---
+---
+
+# Why FoundationDB?
+
+```rust
+let streamer = Kafka::connect(
+    std::env::var("KAFKA_BOOTSTRAP_SERVERS")
+        .unwrap_or_else(|_| "kafka://localhost:9092".to_owned())
+        .parse()
+        .unwrap(),
+    Default::default(),
+)
+.await?;
+
+let payload = message.message();
+let json = payload.as_str().unwrap();
+let data: Product = serde_json::from_str(json)?;
+
+...
+
+let data = Mutation::create_product_from_raw(&db, data.payload).await?;
+
+producer.send(serde_json::to_string(&data))?;
+
+...
+```
+
+---
+---
+
+# Embedding Models
+
+```rust
+match arch.first().map(String::as_str) {
+    Some("BertModel") => {
+        let config: BertConfig = serde_json::from_str(config_str)?;
+        ModelConfig::Bert(config)
+    }
+
+    Some("JinaBertForMaskedLM") => {
+        let config: JinaBertConfig = serde_json::from_str(config_str)?;
+        ModelConfig::JinaBert(config)
+    }
+    Some("CLIPModel") => {
+        let config: ClipConfig = ClipConfig::vit_base_patch32();
+        ModelConfig::Clip(config)
+    }
+
+...
+```
+
+---
+---
+
+# No Langchain
+
+```rust
+use async_trait::async_trait;
+
+use crate::schemas::Error;
+
+#[async_trait]
+pub trait Embedder: Send + Sync {
+    async fn embed_documents(&self, documents: &[String]) -> Result<Vec<Vec<f64>>, Error>;
+    async fn embed_query(&self, text: &str) -> Result<Vec<f64>, Error>;
+    async fn embed_image(&self, image: &[u8]) -> Result<Vec<f64>, Error>;
+    async fn embed_voice(&self, voice: &[u8]) -> Result<Vec<f64>, Error>;
+    async fn embed_voice_batch(&self, voices: &[Vec<u8>]) -> Result<Vec<Vec<f64>>, Error>;
+}
+
+...
+
+let router_layer = RouteLayerBuilder::default()
+    .embedder(Ollama::default())
+    .add_route(returns_route)
+    .add_route(products_route)
+    .aggregation_method(AggregationMethod::Sum)
+    .build()
+    .await
+    .unwrap();
+...
+```
+
+---
+---
+
+# Fun Stats
+
+<ul>
+    <li>SurrealDB serves ~4M customers monthly</li>
+    <li>SurrealDB serves at least ~1.5M recommendations on weekly basis</li>
+    <li>Zero incidents in production since launch</li>
+</ul>
+
+---
+class: text-center
+layout: cover
+---
+# Questions
+
+<style>
+h1 {
+  background-color: #ffff;
+  background-image: linear-gradient(45deg, #9A018F 10%, #8B0294 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
