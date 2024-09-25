@@ -331,4 +331,81 @@ backgroundSize: contain
 ---
 ---
 
-## How SurrealDB is different?
+## SurrealDB Superpowers
+
+<ol class="mt-4">
+    <div v-click class="my-8">
+        <li class="text-lg font-bold uppercase"> Rust </li>
+        <div class="w-3/5 my-2"> It is a reliable and high-performance language. If you want software to work for years you are in the right place. </div>
+    </div>
+    <div v-click class="my-8">
+        <li class="text-lg font-bold uppercase">Flavorless (in a good way)</li>
+        <div class="w-3/5 my-2"> Blending the strengths of SQL, NoSQL, and graph databases</div>
+    </div>
+    <div v-click class="my-8">
+        <li class="text-lg font-bold uppercase">Simplicity</li>
+        <div class="w-3/5 my-2"> 
+        Schemaful or Schemaless, defining data objects is super easy to accomplish within minutes.
+    </div>
+</div>    
+</ol>
+
+---
+---
+
+## Sample models
+
+<div class="my-4">What is actually defined in production!</div>
+
+```rust
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, SimpleObject)]
+#[graphql(concrete(name = "LTV", params()))]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub struct LTV {
+    pub gross_margin_online_52w_sum: Option<f64>,
+    ...
+    pub ltv_ol_gm_group: Option<String>,
+}
+```
+
+<br class="my-2" />
+
+```rust  {all|1-2|3-7|8|all}
+let client = any::connect("memory").await.unwrap();
+client.use_ns("ml").use_db("ltv").await.unwrap();
+let model = LTV {
+    gross_margin_online_52w_sum: Some(0.5),
+    ...
+    ltv_ol_gm_group: Some("test".to_owned()),
+};
+let res = Mutation::create_customer(&client, model.clone()).await.unwrap();
+assert_eq!(res.gross_margin_online_52w_sum, model.gross_margin_online_52w_sum);
+```
+
+---
+---
+
+## Sample models, continued
+
+<div class="my-4">Also, production! Painless linking</div>
+
+```rust {all|8-15|all}
+async fn link_product_variant(
+    db: &Surreal<Any>,
+    product_code: &str,
+    item_id: &str,
+) -> Result<(), Error> {
+    let product_id: String = format!("product_{}", &product_code);
+    let variant_id: String = format!("variant_{}", &item_id);
+    let sql = format!(
+        r#"
+        relate product:{}->product_variant->variant:{}
+        "#,
+        product_id, variant_id
+    );
+
+    db.query(sql).await?;
+
+    Ok(())
+}
+```
