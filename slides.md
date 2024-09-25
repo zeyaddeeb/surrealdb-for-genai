@@ -474,14 +474,17 @@ backgroundSize: contain
 ---
 ## What about scale?
 
-SurrealDB offers you options for distributed options:
+For highly-available and highly-scalable setups, SurrealDB offers you some options for distributed backends:
 
 <ol>
-    <li> <span class="underline">TiKV</span> Backend: For highly-available and highly-scalable setups, SurrealDB can be run on top of a TiKV cluster.
+    <li> <span class="underline">TiKV</span>: SurrealDB can be run on top of a TiKV cluster.
     </li>
-    <li> <span class="underline">FoundationDB</span> Backend: For highly-available and highly-scalable setups, SurrealDB can be run on top of a FoundationDB cluster as well.
+    <li> <span class="underline">FoundationDB</span>: SurrealDB can be run on top of a FoundationDB cluster as well.
     </li>
 </ol>
+
+<br class="mt-4"/>
+See documentation <a href="https://surrealdb.com/docs/surrealdb/installation/running/tikv"> here</a>
 
 ---
 ---
