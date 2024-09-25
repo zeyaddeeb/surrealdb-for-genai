@@ -21,7 +21,7 @@ layout: cover
 ---
 # Scaling <span v-mark.red="0"> SurrealDB </span> for GenAI
 
-How Saks Fifth Avenue personalize recommendations using by SurrealDB's graph capabilities.
+How to personalize recommendations using by SurrealDB's graph capabilities.
 
 <div class="uppercase text-sm tracking-widest">
 Zeyad Deeb
