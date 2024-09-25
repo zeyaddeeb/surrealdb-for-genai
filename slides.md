@@ -606,7 +606,7 @@ h1 {
 ---
 ---
 
-# Why FoundationDB?
+# Why did we choose FoundationDB backend?
 
 ```rust
 let streamer = Kafka::connect(
