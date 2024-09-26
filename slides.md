@@ -296,8 +296,8 @@ let pipeline = pipeline
     .unwrap();
 
 let prompt = "{{#chat}}{{#user}}My name is Zeyad{{/user}}{{/chat}}";
-let pipeline = pipeline.load_template("name", prompt1).unwrap();
-pipeline.execute("name1").await.unwrap();
+let pipeline = pipeline.load_template("name", prompt).unwrap();
+pipeline.execute("name").await.unwrap();
 
 let res = pipeline.execute("question").await.unwrap().content();
 
