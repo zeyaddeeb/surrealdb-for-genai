@@ -606,7 +606,7 @@ h1 {
 ---
 ---
 
-# Why did we choose FoundationDB backend?
+# Time Travel?!
 
 ```rust
 let streamer = Kafka::connect(
