@@ -118,7 +118,7 @@ Before we jump in on how awesome is SurrealDB, let us first review  <span v-mark
 ## LLMs
 <br class="my-2"/>
 
-```rust {all|8-9|18-19|20-23|all}
+```rust {all|7-9|15-22|all}
 use super::*;
 use tokio::io::AsyncWriteExt;
 use tokio_stream::StreamExt;
@@ -133,7 +133,6 @@ async fn test_generate() {
 #[tokio::test]
 async fn test_stream() {
     let ollama = Ollama::default().with_model("llama3.1");
-
     let message = Message::new_user_message("Show me a product like Nancy Sinatra these boots are made for walking?");
     let mut stream = ollama.stream(&vec![message]).await.unwrap();
     let mut stdout = tokio::io::stdout();
@@ -211,7 +210,7 @@ fn test_chat() {
 
 ## Vectorstore
 <br class="my-2"/>
-```rust
+```rust {all|8-12|all}
 #[async_trait]
 impl<C: Connection> VectorStore for Store<C> {
     async fn add_documents(
